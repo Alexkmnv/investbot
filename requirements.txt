@@ -1,0 +1,7 @@
+python-telegram-bot==20.8
+yfinance
+pandas
+scikit-learn
+xgboost
+numpy
+apscheduler
