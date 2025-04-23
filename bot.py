@@ -24,8 +24,7 @@ subscribers = set()
 
 # Команды
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Привет! Я умный инвест-бот.
-Используй /forecast и /subscribe.")
+    await update.message.reply_text("👋 Привет! Я умный инвест-бот.\nИспользуй /forecast и /subscribe.")
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
