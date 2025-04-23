@@ -24,8 +24,7 @@ subscribers = set()
 
 # Команды
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Привет! Я умный инвест-бот.
-Используй /forecast и /subscribe.")
+    await update.message.reply_text("👋 Привет! Я умный инвест-бот. Используй /forecast и /subscribe.")
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -49,8 +48,7 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"📈 Лидер дня: {best[0]} с вероятностью роста {best[1]*100:.2f}%")
     except Exception as e:
         logger.error(f"Ошибка в forecast: {e}")
-        await update.message.reply_text(f"❌ Ошибка при прогнозе:
-{e}")
+        await update.message.reply_text(f"❌ Ошибка при прогнозе: {e}")
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -58,8 +56,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         summary = get_stats()
         await update.message.reply_text(summary)
     except Exception as e:
-        await update.message.reply_text(f"❌ Ошибка при получении статистики:
-{e}")
+        await update.message.reply_text(f"❌ Ошибка при получении статистики: {e}")
 
 # Рассылка по подписке
 def send_forecast_to_all():
