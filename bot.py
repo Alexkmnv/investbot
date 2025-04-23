@@ -39,6 +39,11 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         model, scaler = train_model(dataset)
         predictions = predict_today(model, scaler, data)
 
+        if dataset.empty:
+            await update.message.reply_text("⚠️ Данные для обучения оказались пустыми. Прогноз невозможен.")
+            return
+
+
         if not predictions:
             await update.message.reply_text("⚠️ Недостаточно данных для прогноза.")
             return
