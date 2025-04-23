@@ -35,12 +35,13 @@ def update_actual_returns():
                 end3 = start + timedelta(days=3)
                 data = yf.download(row["ticker"], start=start.strftime("%Y-%m-%d"), end=end3.strftime("%Y-%m-%d"))
                 if not data.empty:
-                    open_price = float(data["Open"].iloc[0])
-                    close_1d = float(data["Close"].iloc[1]) if len(data) > 1 else None
-                    close_3d = float(data["Close"].iloc[2]) if len(data) > 2 else None
-                    if close_1d:
+                    open_price = pd.to_numeric(data["Open"].iloc[0], errors="coerce")
+                    close_1d = pd.to_numeric(data["Close"].iloc[1], errors="coerce") if len(data) > 1 else None
+                    close_3d = pd.to_numeric(data["Close"].iloc[2], errors="coerce") if len(data) > 2 else None
+
+                    if pd.notna(close_1d) and pd.notna(open_price):
                         df.at[i, "actual_1d_return"] = (close_1d - open_price) / open_price
-                    if close_3d:
+                    if pd.notna(close_3d) and pd.notna(open_price):
                         df.at[i, "actual_3d_return"] = (close_3d - open_price) / open_price
                         updated = True
             except Exception as e:
@@ -52,6 +53,8 @@ def get_stats():
     if not os.path.exists(LOG_FILE):
         return "Нет данных для статистики"
     df = pd.read_csv(LOG_FILE).dropna()
+    if df.empty:
+        return "Недостаточно данных для статистики"
     count = len(df)
     avg_prob_3d = df["prob_3d"].mean()
     avg_prob_1d = df["prob_1d"].mean()
