@@ -39,7 +39,7 @@ def update_actual_returns():
                     open_price = float(data["Open"].iloc[0])
                     close_1d = float(data["Close"].iloc[1]) if len(data) > 1 else None
                     close_3d = float(data["Close"].iloc[2]) if len(data) > 2 else None
-                if close_1d:
+                    if close_1d:
                         df.at[i, "actual_1d_return"] = (close_1d - open_price) / open_price
                     if close_3d:
                         df.at[i, "actual_3d_return"] = (close_3d - open_price) / open_price
