@@ -36,10 +36,10 @@ def update_actual_returns():
                 end3 = start + timedelta(days=3)
                 data = yf.download(row["ticker"], start=start.strftime("%Y-%m-%d"), end=end3.strftime("%Y-%m-%d"))
                 if not data.empty:
-                    open_price = data["Open"].iloc[0]
-                    close_1d = data["Close"].iloc[1] if len(data) > 1 else None
-                    close_3d = data["Close"].iloc[2] if len(data) > 2 else None
-                    if close_1d:
+                    open_price = float(data["Open"].iloc[0])
+                    close_1d = float(data["Close"].iloc[1]) if len(data) > 1 else None
+                    close_3d = float(data["Close"].iloc[2]) if len(data) > 2 else None
+                if close_1d:
                         df.at[i, "actual_1d_return"] = (close_1d - open_price) / open_price
                     if close_3d:
                         df.at[i, "actual_3d_return"] = (close_3d - open_price) / open_price
