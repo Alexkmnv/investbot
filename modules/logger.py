@@ -34,22 +34,20 @@ def update_actual_returns():
                 start = datetime.strptime(row["date"], "%Y-%m-%d")
                 end3 = start + timedelta(days=3)
                 data = yf.download(row["ticker"], start=start.strftime("%Y-%m-%d"), end=end3.strftime("%Y-%m-%d"))
-                
+
                 if not data.empty and len(data) > 2:
-                    open_price = data["Open"].iloc[0]
-                    close_1d = data["Close"].iloc[1]
-                    close_3d = data["Close"].iloc[2]
-
                     try:
-                        open_price = float(open_price)
-                        close_1d = float(close_1d)
-                        close_3d = float(close_3d)
+                        open_price = float(data["Open"].iloc[0])
+                        close_1d = float(data["Close"].iloc[1])
+                        close_3d = float(data["Close"].iloc[2])
+                    except Exception as convert_error:
+                        print(f"❌ Ошибка преобразования в число: {convert_error}")
+                        continue
 
+                    if open_price != 0:
                         df.at[i, "actual_1d_return"] = (close_1d - open_price) / open_price
                         df.at[i, "actual_3d_return"] = (close_3d - open_price) / open_price
                         updated = True
-                    except:
-                        print(f"Ошибка преобразования чисел для {row['ticker']}")
             except Exception as e:
                 print(f"Ошибка обновления {row['ticker']}: {e}")
     if updated:
