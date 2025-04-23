@@ -1,9 +1,14 @@
 
+import os
 import pandas as pd
 import numpy as np
+import joblib
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
+
+MODEL_PATH = "model.pkl"
+SCALER_PATH = "scaler.pkl"
 
 def create_features(df):
     df[["Open", "High", "Low", "Close", "Volume"]] = df[["Open", "High", "Low", "Close", "Volume"]].apply(pd.to_numeric, errors="coerce")
@@ -51,16 +56,27 @@ def train_model(data, horizon="target_3d"):
     if len(X) < 5:
         raise ValueError(f"Недостаточно данных: только {len(X)} строк.")
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
     scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    X_scaled = scaler.fit_transform(X)
 
-    model = XGBClassifier(use_label_encoder=False, eval_metric="logloss")
-    model.fit(X_train_scaled, y_train)
+    model = None
+    if os.path.exists(MODEL_PATH):
+        model = joblib.load(MODEL_PATH)
+        model.fit(X_scaled, y, xgb_model=model.get_booster())
+    else:
+        model = XGBClassifier(use_label_encoder=False, eval_metric="logloss")
+        model.fit(X_scaled, y)
 
+    joblib.dump(model, MODEL_PATH)
+    joblib.dump(scaler, SCALER_PATH)
     return model, scaler
+
+def load_model_and_scaler():
+    if os.path.exists(MODEL_PATH) and os.path.exists(SCALER_PATH):
+        model = joblib.load(MODEL_PATH)
+        scaler = joblib.load(SCALER_PATH)
+        return model, scaler
+    return None, None
 
 def predict_today(model, scaler, data_dict):
     predictions = []
