@@ -6,9 +6,7 @@ from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 
 def create_features(df):
-    # Приводим все числовые поля к float
     df[["Open", "High", "Low", "Close", "Volume"]] = df[["Open", "High", "Low", "Close", "Volume"]].apply(pd.to_numeric, errors="coerce")
-
     df["return"] = df["Close"].pct_change()
     df["sma_5"] = df["Close"].rolling(window=5).mean()
     df["sma_10"] = df["Close"].rolling(window=10).mean()
@@ -25,17 +23,33 @@ def prepare_dataset(data_dict):
     all_rows = []
     for ticker, df in data_dict.items():
         df = create_features(df)
+        if df.empty:
+            continue
         df = label_data(df)
         df["ticker"] = ticker
         all_rows.append(df)
+
+    if not all_rows:
+        print("⚠️ prepare_dataset: нет подходящих данных для обучения")
+        return pd.DataFrame()
+
     full_data = pd.concat(all_rows)
     full_data = full_data.dropna()
+
+    if full_data.empty:
+        print("⚠️ prepare_dataset: после очистки данных ничего не осталось!")
     return full_data
 
 def train_model(data, horizon="target_3d"):
+    if data.empty:
+        raise ValueError("Датасет пустой, модель не может быть обучена.")
+
     features = ["Open", "High", "Low", "Close", "Volume", "return", "sma_5", "sma_10", "volatility"]
     X = data[features]
     y = data[horizon]
+
+    if len(X) < 5:
+        raise ValueError(f"Недостаточно данных: только {len(X)} строк.")
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
