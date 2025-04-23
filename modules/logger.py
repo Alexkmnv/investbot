@@ -1,3 +1,4 @@
+
 import pandas as pd
 import os
 from datetime import datetime, timedelta
@@ -31,19 +32,24 @@ def update_actual_returns():
         if pd.isna(row["actual_1d_return"]) or pd.isna(row["actual_3d_return"]):
             try:
                 start = datetime.strptime(row["date"], "%Y-%m-%d")
-                end1 = start + timedelta(days=1)
                 end3 = start + timedelta(days=3)
                 data = yf.download(row["ticker"], start=start.strftime("%Y-%m-%d"), end=end3.strftime("%Y-%m-%d"))
-                if not data.empty:
-                    open_price = pd.to_numeric(data["Open"].iloc[0], errors="coerce")
-                    close_1d = pd.to_numeric(data["Close"].iloc[1], errors="coerce") if len(data) > 1 else None
-                    close_3d = pd.to_numeric(data["Close"].iloc[2], errors="coerce") if len(data) > 2 else None
+                
+                if not data.empty and len(data) > 2:
+                    open_price = data["Open"].iloc[0]
+                    close_1d = data["Close"].iloc[1]
+                    close_3d = data["Close"].iloc[2]
 
-                    if pd.notna(close_1d) and pd.notna(open_price):
+                    try:
+                        open_price = float(open_price)
+                        close_1d = float(close_1d)
+                        close_3d = float(close_3d)
+
                         df.at[i, "actual_1d_return"] = (close_1d - open_price) / open_price
-                    if pd.notna(close_3d) and pd.notna(open_price):
                         df.at[i, "actual_3d_return"] = (close_3d - open_price) / open_price
                         updated = True
+                    except:
+                        print(f"Ошибка преобразования чисел для {row['ticker']}")
             except Exception as e:
                 print(f"Ошибка обновления {row['ticker']}: {e}")
     if updated:
@@ -64,11 +70,11 @@ def get_stats():
     avg_return_3d = df["actual_3d_return"].mean()
 
     return (
-        f"📊 Прогнозов: {count}\\n"
-        f"📈 Средняя вероятность роста (3 дня): {avg_prob_3d:.1%}\\n"
-        f"⚡ Средняя вероятность роста (1 день): {avg_prob_1d:.1%}\\n"
-        f"✅ Успешных прогнозов (1 день): {success_1d:.1%}\\n"
-        f"🚀 Успешных прогнозов (3 дня): {success_3d:.1%}\\n"
-        f"💵 Средний доход за день: {avg_return_1d:.2%}\\n"
+        f"📊 Прогнозов: {count}\n"
+        f"📈 Средняя вероятность роста (3 дня): {avg_prob_3d:.1%}\n"
+        f"⚡ Средняя вероятность роста (1 день): {avg_prob_1d:.1%}\n"
+        f"✅ Успешных прогнозов (1 день): {success_1d:.1%}\n"
+        f"🚀 Успешных прогнозов (3 дня): {success_3d:.1%}\n"
+        f"💵 Средний доход за день: {avg_return_1d:.2%}\n"
         f"💵 Средний доход за 3 дня: {avg_return_3d:.2%}"
     )
