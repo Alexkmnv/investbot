@@ -6,6 +6,9 @@ from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 
 def create_features(df):
+    # Приводим все числовые поля к float
+    df[["Open", "High", "Low", "Close", "Volume"]] = df[["Open", "High", "Low", "Close", "Volume"]].apply(pd.to_numeric, errors="coerce")
+
     df["return"] = df["Close"].pct_change()
     df["sma_5"] = df["Close"].rolling(window=5).mean()
     df["sma_10"] = df["Close"].rolling(window=10).mean()
@@ -49,6 +52,8 @@ def predict_today(model, scaler, data_dict):
     predictions = []
     for ticker, df in data_dict.items():
         df = create_features(df)
+        if df.empty:
+            continue
         latest = df.iloc[-1:]
         X = latest[["Open", "High", "Low", "Close", "Volume", "return", "sma_5", "sma_10", "volatility"]]
         X_scaled = scaler.transform(X)
