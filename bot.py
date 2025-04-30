@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Переменные окружения или напрямую токен
-TOKEN = os.environ.get("TOKEN") or "7904337093:AAFtX2tjlkiyfqgAyBcgU5d4qsthdI74bkM"
+TOKEN = os.environ.get("TOKEN") 
 PORT = int(os.environ.get("PORT", "8443"))
 
 # Telegram
